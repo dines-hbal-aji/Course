@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}{{ course.name }} - Student{% endblock %}
+{% block page_title %}{{ course.name }}{% endblock %}
+{% block page_subtitle %}{{ course.code }} · Semester {{ course.semester }} · {{ course.credits }} Credits{% endblock %}
+
+{% block content %}
+
+<!-- TABS -->
+<div style="display:flex;gap:4px;margin-bottom:24px;background:#1a1d27;border-radius:12px;padding:4px;max-width:fit-content">
+    <button class="tab-btn active" onclick="showTab('assignments')">📝 Assignments ({{ assignments|length }})</button>
+    <button class="tab-btn" onclick="showTab('materials')">📁 Materials ({{ materials|length }})</button>
+    <button class="tab-btn" onclick="showTab('exams')">📅 Exams ({{ exams|length }})</button>
+</div>
+
+<!-- ASSIGNMENTS TAB -->
+<div id="tab-assignments" class="tab-content">
+    {% if assignments %}
+    <div class="grid-2">
+        {% for a in assignments %}
+        <div class="card">
+            <div class="card-body">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;align-items:flex-start">
+                    <h3 style="font-size:15px;font-weight:700;color:#f1f5f9;flex:1;margin-right:12px">{{ a.title }}</h3>
+                    {% if a.id in my_submissions %}
+                    <span class="badge badge-success">✅ Submitted{% if my_submissions[a.id].is_late %} (Late){% endif %}</span>
+                    {% else %}
+                    <span class="badge badge-warning">⏳ Pending</span>
+                    {% endif %}
+                </div>
+                
+                <p style="font-size:13px;color:#64748b;margin-bottom:14px;line-height:1.5">{{ a.description or 'No description provided.' }}</p>
+                
+                <div style="display:flex;gap:14px;font-size:12px;color:#94a3b8;margin-bottom:16px;padding-top:12px;border-top:1px solid #2a2d3e">
+                    <span><i class="fas fa-calendar" style="color:#f59e0b;margin-right:4px"></i>Due: {{ a.due_date.strftime('%d %b %Y') if a.due_date else 'Open' }}</span>
+                    <span><i class="fas fa-star" style="color:#818cf8;margin-right:4px"></i>{{ a.max_marks }} Marks</span>
+                </div>
+
+                {% if a.id in my_submissions %}
+                    {% set sub = my_submissions[a.id] %}
+                    <div style="padding:12px;background:#12141c;border-radius:10px;margin-bottom:12px">
+                        <div style="font-size:12px;font-weight:600;color:#10b981;margin-bottom:6px">✅ Submitted on {{ sub.submitted_at.strftime('%d %b %Y') }}</div>
+                        {% if sub.grade is not none %}
+                        <div style="font-size:14px;font-weight:700;color:#f1f5f9">
+                            Grade: <span style="color:{% if sub.grade/a.max_marks >= 0.8 %}#10b981{% elif sub.grade/a.max_marks >= 0.5 %}#f59e0b{% else %}#ef4444{% endif %}">
+                                {{ sub.grade }}/{{ a.max_marks }}
+                            </span>
+                        </div>
+                        {% if sub.feedback %}
+                        <div style="font-size:12px;color:#64748b;margin-top:6px">💬 {{ sub.feedback }}</div>
+                        {% endif %}
+                        {% else %}
+                        <div style="font-size:12px;color:#64748b">Awaiting grade from faculty...</div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                <form method="POST" action="/student/submit/{{ a.id }}" enctype="multipart/form-data">
+                    <div style="display:flex;gap:8px">
+                        <input type="file" name="file" class="form-control" style="flex:1;font-size:12px">
+                        <button type="submit" class="btn btn-primary btn-sm" style="white-space:nowrap">
+                            <i class="fas fa-upload"></i> Submit
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card"><div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">No Assignments Yet</div></div></div>
+    {% endif %}
+</div>
+
+<!-- MATERIALS TAB -->
+<div id="tab-materials" class="tab-content" style="display:none">
+    {% if materials %}
+    <div class="grid-3">
+        {% for m in materials %}
+        <div class="card">
+            <div class="card-body">
+                <div style="width:52px;height:52px;border-radius:14px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px">
+                    {% if m.file_type == 'pdf' %}📄{% elif m.file_type == 'video' %}🎥{% elif m.file_type == 'presentation' %}📊{% else %}📁{% endif %}
+                </div>
+                <h3 style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">{{ m.title }}</h3>
+                <p style="font-size:12px;color:#64748b;margin-bottom:14px">{{ m.description or '' }}</p>
+                <div style="font-size:11px;color:#4b5563;margin-bottom:14px">
+                    <i class="fas fa-download" style="margin-right:4px"></i>{{ m.download_count }} downloads
+                </div>
+                {% if m.file_path %}
+                <a href="#" class="btn btn-success btn-sm w-full" style="justify-content:center">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card"><div class="empty-state"><div class="empty-icon">📁</div><div class="empty-title">No Study Materials Yet</div></div></div>
+    {% endif %}
+</div>
+
+<!-- EXAMS TAB -->
+<div id="tab-exams" class="tab-content" style="display:none">
+    {% if exams %}
+    <div class="grid-2">
+        {% for exam in exams %}
+        <div class="card">
+            <div class="card-body">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                    <h3 style="font-size:15px;font-weight:700;color:#f1f5f9">{{ exam.title }}</h3>
+                    <span class="badge badge-{% if exam.exam_type == 'final' %}danger{% elif exam.exam_type == 'midterm' %}warning{% else %}info{% endif %}">
+                        {{ exam.exam_type }}
+                    </span>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:#94a3b8;margin-bottom:14px">
+                    <div><i class="fas fa-calendar" style="color:#f59e0b;margin-right:6px"></i>{{ exam.exam_date.strftime('%d %b %Y') if exam.exam_date else 'TBD' }}</div>
+                    <div><i class="fas fa-clock" style="color:#06b6d4;margin-right:6px"></i>{{ exam.duration }} mins</div>
+                    <div><i class="fas fa-star" style="color:#818cf8;margin-right:6px"></i>{{ exam.max_marks }} Marks</div>
+                    <div><i class="fas fa-map-marker" style="color:#10b981;margin-right:6px"></i>{{ exam.venue or 'TBD' }}</div>
+                </div>
+
+                {% if exam.id in my_results %}
+                    {% set res = my_results[exam.id] %}
+                    <div style="padding:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:12px">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <div style="font-size:12px;color:#64748b;margin-bottom:4px">Your Score</div>
+                                <div style="font-size:22px;font-weight:800;color:#f1f5f9">{{ res.marks_obtained }}<span style="font-size:14px;color:#64748b">/{{ res.total_marks }}</span></div>
+                            </div>
+                            <div style="text-align:center">
+                                <div style="font-size:32px;font-weight:900;color:{% if res.grade_letter in ['O','A+'] %}#10b981{% elif res.grade_letter in ['A','B+'] %}#3b82f6{% elif res.grade_letter in ['B','C'] %}#f59e0b{% else %}#ef4444{% endif %}">
+                                    {{ res.grade_letter }}
+                                </div>
+                                <div style="font-size:10px;color:#64748b">Grade</div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                <div style="padding:10px;text-align:center;background:#12141c;border-radius:10px;font-size:13px;color:#64748b">
+                    <i class="fas fa-hourglass-half" style="margin-right:6px;color:#f59e0b"></i>Results not published yet
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card"><div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No Exams Scheduled</div></div></div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.tab-btn {
+    padding: 8px 18px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+.tab-btn:hover { color: #f1f5f9; background: rgba(255,255,255,0.05); }
+.tab-btn.active { background: rgba(79,172,254,0.15); color: #4facfe; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).style.display = '';
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

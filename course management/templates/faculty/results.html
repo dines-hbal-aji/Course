@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Results - {{ exam.title }}{% endblock %}
+{% block page_title %}Exam Results{% endblock %}
+{% block page_subtitle %}{{ exam.title }} · {{ exam.max_marks }} marks · {{ exam.exam_type|capitalize }}{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">📊 Enter / Update Results</span>
+        <span class="badge badge-info">{{ students|length }} Students</span>
+    </div>
+    <div class="card-body" style="padding:0">
+        <form method="POST" action="/faculty/results/save">
+            <input type="hidden" name="exam_id" value="{{ exam.id }}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Marks (/ {{ exam.max_marks }})</th>
+                        <th>Grade</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student, enroll in students %}
+                    <tr>
+                        <td>
+                            <input type="hidden" name="student_id[]" value="{{ student.id }}">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4facfe,#00f2fe);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">
+                                    {{ student.name[0] }}
+                                </div>
+                                <span style="font-weight:600;color:#f1f5f9">{{ student.name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="number" name="marks[]" class="form-control" 
+                                   style="width:100px"
+                                   value="{{ results[student.id].marks_obtained if student.id in results else '' }}"
+                                   min="0" max="{{ exam.max_marks }}" step="0.5"
+                                   placeholder="0">
+                        </td>
+                        <td>
+                            {% if student.id in results %}
+                            <span class="badge badge-{% if results[student.id].grade_letter in ['O','A+','A'] %}success{% elif results[student.id].grade_letter in ['B+','B'] %}info{% elif results[student.id].grade_letter == 'C' %}warning{% else %}danger{% endif %}">
+                                {{ results[student.id].grade_letter }}
+                            </span>
+                            {% else %}
+                            <span style="color:#4b5563;font-size:13px">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if student.id in results %}
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div class="progress" style="width:80px">
+                                    <div class="progress-bar" style="width:{{ (results[student.id].marks_obtained / exam.max_marks * 100)|int }}%"></div>
+                                </div>
+                                <span style="font-size:12px;color:#94a3b8">{{ '%.1f'|format(results[student.id].marks_obtained / exam.max_marks * 100) }}%</span>
+                            </div>
+                            {% else %}
+                            <span style="color:#4b5563;font-size:13px">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No Students Enrolled</div></div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if students %}
+            <div style="padding:20px;border-top:1px solid #2a2d3e;display:flex;justify-content:flex-end">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Save & Publish Results
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

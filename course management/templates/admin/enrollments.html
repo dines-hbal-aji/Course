@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Enrollments - Admin{% endblock %}
+{% block page_title %}Enrollment Management{% endblock %}
+{% block page_subtitle %}Approve or reject course enrollment requests{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap">
+    <a href="/admin/enrollments?status=pending" class="btn {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline{% endif %} btn-sm">
+        ⏳ Pending
+    </a>
+    <a href="/admin/enrollments?status=approved" class="btn {% if status_filter == 'approved' %}btn-success{% else %}btn-outline{% endif %} btn-sm">
+        ✅ Approved
+    </a>
+    <a href="/admin/enrollments?status=rejected" class="btn {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline{% endif %} btn-sm">
+        ❌ Rejected
+    </a>
+    <a href="/admin/enrollments?status=all" class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+        📋 All
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">📋 Enrollment Requests — {{ status_filter|capitalize }}</span>
+        <span class="badge badge-{% if status_filter == 'pending' %}warning{% elif status_filter == 'approved' %}success{% elif status_filter == 'rejected' %}danger{% else %}info{% endif %}">
+            {{ enrollments|length }} Records
+        </span>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Faculty</th>
+                    <th>Requested On</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enroll, student, course in enrollments %}
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4facfe,#00f2fe);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">
+                                {{ student.name[0] }}
+                            </div>
+                            <div>
+                                <div style="font-weight:600;color:#f1f5f9;font-size:14px">{{ student.name }}</div>
+                                <div style="font-size:11px;color:#64748b">{{ student.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;color:#f1f5f9;font-size:13px">{{ course.name }}</div>
+                        <div style="font-size:11px;color:#64748b">{{ course.code }} · Sem {{ course.semester }}</div>
+                    </td>
+                    <td style="font-size:13px;color:#94a3b8">
+                        {% if course.faculty %}{{ course.faculty.name }}{% else %}Unassigned{% endif %}
+                    </td>
+                    <td style="font-size:12px;color:#64748b">{{ enroll.enrolled_at.strftime('%d %b %Y, %H:%M') }}</td>
+                    <td>
+                        <span class="badge badge-{% if enroll.status == 'approved' %}success{% elif enroll.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {% if enroll.status == 'approved' %}✅{% elif enroll.status == 'rejected' %}❌{% else %}⏳{% endif %}
+                            {{ enroll.status|capitalize }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if enroll.status == 'pending' %}
+                        <div style="display:flex;gap:6px">
+                            <form method="POST" action="/admin/enrollments/{{ enroll.id }}/approve">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                            </form>
+                            <form method="POST" action="/admin/enrollments/{{ enroll.id }}/reject">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span class="text-muted text-sm">
+                            {% if enroll.approved_at %}
+                                Processed {{ enroll.approved_at.strftime('%d %b') }}
+                            {% else %}
+                                Processed
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div class="empty-title">No Enrollment Requests</div>
+                            <div class="empty-text">No {{ status_filter }} enrollment requests found</div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

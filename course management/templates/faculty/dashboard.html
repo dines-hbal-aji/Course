@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Faculty Dashboard - EduCMS{% endblock %}
+{% block page_title %}Faculty Dashboard{% endblock %}
+{% block page_subtitle %}Welcome, {{ current_user.name }}! Manage your courses and students.{% endblock %}
+
+{% block content %}
+
+<!-- STAT CARDS -->
+<div class="grid-4 mb-24 fade-in">
+    <div class="stat-card" style="--card-gradient:linear-gradient(135deg,#f093fb,#f5576c)">
+        <div class="stat-icon" style="background:rgba(240,147,251,0.15);color:#f093fb"><i class="fas fa-book-open"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ my_courses|length }}</div>
+            <div class="stat-label">My Courses</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient:linear-gradient(135deg,#4facfe,#00f2fe)">
+        <div class="stat-icon" style="background:rgba(79,172,254,0.15);color:#4facfe"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_students }}</div>
+            <div class="stat-label">Total Students</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient:linear-gradient(135deg,#f59e0b,#ef4444)">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b"><i class="fas fa-tasks"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_assignments }}</div>
+            <div class="stat-label">Assignments</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient:linear-gradient(135deg,#10b981,#06b6d4)">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#10b981"><i class="fas fa-edit"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ pending_submissions }}</div>
+            <div class="stat-label">Pending Grades</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2 mb-24">
+    <!-- My Courses -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <span class="card-title">📚 My Courses</span>
+            <a href="/faculty/courses" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+            {% if my_courses %}
+            {% for course in my_courses %}
+            <a href="/faculty/courses/{{ course.id }}" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid #2a2d3e;text-decoration:none;transition:background 0.2s" 
+               onmouseover="this.style.background='#22263a'" onmouseout="this.style.background=''">
+                <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">
+                    📖
+                </div>
+                <div style="flex:1">
+                    <div style="font-weight:600;color:#f1f5f9;font-size:14px">{{ course.name }}</div>
+                    <div style="font-size:12px;color:#64748b">{{ course.code }} · Sem {{ course.semester }} · {{ course.credits }} credits</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#4b5563"></i>
+            </a>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📚</div>
+                <div class="empty-title">No Courses Assigned</div>
+                <div class="empty-text">Contact admin to assign courses</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Upcoming Exams & Announcements -->
+    <div class="flex flex-col gap-20">
+        <div class="card fade-in">
+            <div class="card-header">
+                <span class="card-title">📅 Upcoming Exams</span>
+            </div>
+            <div class="card-body" style="padding:0">
+                {% if upcoming_exams %}
+                {% for exam in upcoming_exams %}
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #2a2d3e">
+                    <div style="width:42px;height:42px;border-radius:10px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;font-size:18px">📅</div>
+                    <div style="flex:1">
+                        <div style="font-weight:600;color:#f1f5f9;font-size:13px">{{ exam.title }}</div>
+                        <div style="font-size:11px;color:#64748b">
+                            {{ exam.exam_date.strftime('%d %b %Y, %H:%M') if exam.exam_date else 'TBD' }} · {{ exam.venue or 'TBD' }}
+                        </div>
+                    </div>
+                    <span class="badge badge-warning">{{ exam.exam_type }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state" style="padding:30px">
+                    <div style="font-size:32px;margin-bottom:8px">📅</div>
+                    <div style="color:#64748b;font-size:13px">No upcoming exams</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card fade-in">
+            <div class="card-header"><span class="card-title">📢 Announcements</span></div>
+            <div class="card-body" style="padding:0">
+                {% if announcements %}
+                {% for ann in announcements %}
+                <div style="padding:14px 20px;border-bottom:1px solid #2a2d3e">
+                    <div style="font-weight:600;color:#f1f5f9;font-size:13px;margin-bottom:4px">{{ ann.title }}</div>
+                    <div style="font-size:12px;color:#64748b">{{ ann.content[:80] }}{% if ann.content|length > 80 %}…{% endif %}</div>
+                    <div style="font-size:11px;color:#4b5563;margin-top:6px">{{ ann.created_at.strftime('%d %b') }}</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state" style="padding:30px"><div style="color:#64748b;font-size:13px">No announcements</div></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

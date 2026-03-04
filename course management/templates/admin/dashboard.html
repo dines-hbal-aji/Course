@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - EduCMS{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ current_user.name }}! Here's today's overview.{% endblock %}
+
+{% block header_actions %}
+<a href="/admin/courses" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> New Course
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- STAT CARDS -->
+<div class="grid-4 mb-24 fade-in">
+    <div class="stat-card" style="--card-gradient: linear-gradient(135deg,#667eea,#764ba2)">
+        <div class="stat-icon" style="background:rgba(102,126,234,0.15);color:#818cf8">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_students }}</div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-change" style="color:#10b981"><i class="fas fa-arrow-up"></i> Active Enrollments</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient: linear-gradient(135deg,#f093fb,#f5576c)">
+        <div class="stat-icon" style="background:rgba(240,147,251,0.15);color:#f093fb">
+            <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_faculty }}</div>
+            <div class="stat-label">Faculty Members</div>
+            <div class="stat-change" style="color:#94a3b8"><i class="fas fa-minus"></i> Teaching Staff</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient: linear-gradient(135deg,#4facfe,#00f2fe)">
+        <div class="stat-icon" style="background:rgba(79,172,254,0.15);color:#4facfe">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ active_courses }}</div>
+            <div class="stat-label">Active Courses</div>
+            <div class="stat-change" style="color:#10b981"><i class="fas fa-arrow-up"></i> {{ total_courses }} Total</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient: linear-gradient(135deg,#f59e0b,#ef4444)">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ pending_enrollments }}</div>
+            <div class="stat-label">Pending Approvals</div>
+            {% if pending_enrollments > 0 %}
+            <div class="stat-change" style="color:#f59e0b"><i class="fas fa-exclamation"></i> Needs attention</div>
+            {% else %}
+            <div class="stat-change" style="color:#10b981"><i class="fas fa-check"></i> All cleared</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="grid-2 mb-24">
+    <!-- Enrollment Chart -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <span class="card-title">📈 Monthly Enrollments</span>
+            <span class="badge badge-info">2024</span>
+        </div>
+        <div class="card-body">
+            <canvas id="enrollmentChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Course Distribution -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <span class="card-title">🎯 Course Enrollment Distribution</span>
+            <span class="badge badge-success">Active</span>
+        </div>
+        <div class="card-body">
+            <canvas id="courseChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM ROW -->
+<div class="grid-2 mb-24">
+    <!-- Recent Enrollments -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <span class="card-title">📋 Recent Enrollment Requests</span>
+            <a href="/admin/enrollments" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+            {% if recent_enrollments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enroll, student, course in recent_enrollments %}
+                    <tr>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">
+                                    {{ student.name[0] }}
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;color:#f1f5f9;font-size:13px">{{ student.name }}</div>
+                                    <div style="font-size:11px;color:#64748b">{{ student.department or 'N/A' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px">{{ course.name[:25] }}{% if course.name|length > 25 %}…{% endif %}</td>
+                        <td>
+                            <span class="badge badge-{% if enroll.status == 'approved' %}success{% elif enroll.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                {{ enroll.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if enroll.status == 'pending' %}
+                            <form method="POST" action="/admin/enrollments/{{ enroll.id }}/approve" style="display:inline">
+                                <button type="submit" class="btn btn-success btn-sm btn-icon" title="Approve"><i class="fas fa-check"></i></button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-title">No Recent Requests</div>
+                <div class="empty-text">Enrollment requests will appear here</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <span class="card-title">📢 Latest Announcements</span>
+            <a href="/admin/announcements" class="btn btn-outline btn-sm">Manage</a>
+        </div>
+        <div class="card-body">
+            {% if announcements %}
+                {% for ann in announcements %}
+                <div style="padding:16px;background:#12141c;border-radius:12px;margin-bottom:12px;border-left:3px solid #6366f1">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                        <span style="font-weight:600;font-size:14px;color:#f1f5f9">{{ ann.title }}</span>
+                        <span class="badge badge-{% if ann.target_role == 'all' %}primary{% elif ann.target_role == 'student' %}info{% else %}warning{% endif %}">
+                            {{ ann.target_role }}
+                        </span>
+                    </div>
+                    <p style="font-size:13px;color:#64748b;line-height:1.5">{{ ann.content[:120] }}{% if ann.content|length > 120 %}…{% endif %}</p>
+                    <div style="font-size:11px;color:#4b5563;margin-top:8px">
+                        <i class="fas fa-calendar" style="margin-right:4px"></i>
+                        {{ ann.created_at.strftime('%d %b %Y') }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📢</div>
+                <div class="empty-title">No Announcements</div>
+                <div class="empty-text">Post your first announcement</div>
+            </div>
+            {% endif %}
+            <a href="/admin/announcements" class="btn btn-primary w-full mt-16" style="justify-content:center">
+                <i class="fas fa-plus"></i> New Announcement
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Row -->
+<div class="grid-3">
+    <div class="card fade-in" style="border-left:3px solid #10b981">
+        <div class="card-body" style="display:flex;align-items:center;gap:16px">
+            <div style="width:52px;height:52px;background:rgba(16,185,129,0.12);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px">📝</div>
+            <div>
+                <div style="font-size:28px;font-weight:800;color:#f1f5f9">{{ total_assignments }}</div>
+                <div style="font-size:13px;color:#64748b">Total Assignments</div>
+            </div>
+        </div>
+    </div>
+    <div class="card fade-in" style="border-left:3px solid #f59e0b">
+        <div class="card-body" style="display:flex;align-items:center;gap:16px">
+            <div style="width:52px;height:52px;background:rgba(245,158,11,0.12);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px">📅</div>
+            <div>
+                <div style="font-size:28px;font-weight:800;color:#f1f5f9">{{ total_exams }}</div>
+                <div style="font-size:13px;color:#64748b">Scheduled Exams</div>
+            </div>
+        </div>
+    </div>
+    <div class="card fade-in" style="border-left:3px solid #3b82f6">
+        <div class="card-body" style="display:flex;align-items:center;gap:16px">
+            <div style="width:52px;height:52px;background:rgba(59,130,246,0.12);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px">⚡</div>
+            <div>
+                <div style="font-size:28px;font-weight:800;color:#10b981">Active</div>
+                <div style="font-size:13px;color:#64748b">System Status</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Monthly enrollments line chart
+const ctx1 = document.getElementById('enrollmentChart').getContext('2d');
+new Chart(ctx1, {
+    type: 'line',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+            label: 'Enrollments',
+            data: {{ monthly_data }},
+            fill: true,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.1)',
+            tension: 0.4,
+            pointBackgroundColor: '#6366f1',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            x: { grid: { color: 'rgba(42,45,62,0.8)' }, ticks: { color: '#64748b' } },
+            y: { grid: { color: 'rgba(42,45,62,0.8)' }, ticks: { color: '#64748b' } }
+        }
+    }
+});
+
+// Course distribution doughnut chart
+const ctx2 = document.getElementById('courseChart').getContext('2d');
+new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: {{ course_labels }},
+        datasets: [{
+            data: {{ course_data }},
+            backgroundColor: [
+                'rgba(99,102,241,0.8)',
+                'rgba(6,182,212,0.8)',
+                'rgba(245,158,11,0.8)',
+                'rgba(16,185,129,0.8)',
+                'rgba(239,68,68,0.8)',
+                'rgba(168,85,247,0.8)',
+                'rgba(59,130,246,0.8)',
+                'rgba(236,72,153,0.8)',
+            ],
+            borderColor: '#1a1d27',
+            borderWidth: 3,
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: { color: '#94a3b8', padding: 16, font: { size: 12 } }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

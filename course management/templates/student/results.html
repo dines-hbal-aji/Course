@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}My Results - Student{% endblock %}
+{% block page_title %}Exam Results{% endblock %}
+{% block page_subtitle %}Your complete academic performance record{% endblock %}
+
+{% block content %}
+
+{% if results %}
+<!-- Grade Summary Cards -->
+<div class="grid-4 mb-24">
+    {% set total_pct = namespace(val=0, count=0) %}
+    {% for result, exam, course in results %}
+        {% set total_pct.val = total_pct.val + (result.marks_obtained / result.total_marks * 100) %}
+        {% set total_pct.count = total_pct.count + 1 %}
+    {% endfor %}
+
+    <div class="stat-card" style="--card-gradient:linear-gradient(135deg,#4facfe,#00f2fe)">
+        <div class="stat-icon" style="background:rgba(79,172,254,0.15);color:#4facfe"><i class="fas fa-file-alt"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ results|length }}</div>
+            <div class="stat-label">Total Exams</div>
+        </div>
+    </div>
+    <div class="stat-card" style="--card-gradient:linear-gradient(135deg,#10b981,#06b6d4)">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#10b981"><i class="fas fa-percentage"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ '%.1f'|format(total_pct.val / total_pct.count if total_pct.count else 0) }}%</div>
+            <div class="stat-label">Average Score</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b"><i class="fas fa-trophy"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ results | selectattr('0.grade_letter', 'in', ['O','A+','A']) | list | length }}</div>
+            <div class="stat-label">High Grades (A+)</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#ef4444"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-info">
+            <div class="stat-value">{{ results | selectattr('0.grade_letter', 'equalto', 'F') | list | length }}</div>
+            <div class="stat-label">Failed Exams</div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">📊 Detailed Results</span>
+        <span class="badge badge-info">{{ results|length }} Records</span>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Exam</th>
+                    <th>Course</th>
+                    <th>Type</th>
+                    <th>Marks</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th>Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result, exam, course in results %}
+                {% set pct = (result.marks_obtained / result.total_marks * 100)|round(1) %}
+                <tr>
+                    <td style="color:#4b5563">{{ loop.index }}</td>
+                    <td>
+                        <div style="font-weight:600;color:#f1f5f9;font-size:14px">{{ exam.title }}</div>
+                        <div style="font-size:11px;color:#64748b">{{ exam.exam_date.strftime('%d %b %Y') if exam.exam_date else 'N/A' }}</div>
+                    </td>
+                    <td style="font-size:13px;color:#94a3b8">{{ course.name }}</td>
+                    <td>
+                        <span class="badge badge-{% if exam.exam_type == 'final' %}danger{% elif exam.exam_type == 'midterm' %}warning{% else %}info{% endif %}">
+                            {{ exam.exam_type }}
+                        </span>
+                    </td>
+                    <td style="font-weight:700;font-size:14px;color:#f1f5f9">
+                        {{ result.marks_obtained }}<span style="color:#4b5563;font-size:12px">/{{ result.total_marks }}</span>
+                    </td>
+                    <td style="font-weight:600;color:{% if pct >= 80 %}#10b981{% elif pct >= 60 %}#3b82f6{% elif pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}">
+                        {{ pct }}%
+                    </td>
+                    <td>
+                        <div style="width:44px;height:44px;border-radius:12px;
+                            background:{% if result.grade_letter in ['O','A+'] %}rgba(16,185,129,0.15){% elif result.grade_letter in ['A','B+'] %}rgba(59,130,246,0.15){% elif result.grade_letter in ['B','C'] %}rgba(245,158,11,0.15){% else %}rgba(239,68,68,0.15){% endif %};
+                            display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;
+                            color:{% if result.grade_letter in ['O','A+'] %}#10b981{% elif result.grade_letter in ['A','B+'] %}#3b82f6{% elif result.grade_letter in ['B','C'] %}#f59e0b{% else %}#ef4444{% endif %}">
+                            {{ result.grade_letter }}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div class="progress" style="width:80px">
+                                <div class="progress-bar" style="width:{{ pct }}%;background:{% if pct >= 80 %}#10b981{% elif pct >= 60 %}#3b82f6{% elif pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Grade Legend -->
+<div class="card mt-16">
+    <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="font-size:13px;font-weight:600;color:#94a3b8;margin-right:8px">Grade Scale:</div>
+        {% for grade, range, color in [('O', '90-100%', '#10b981'), ('A+', '80-89%', '#10b981'), ('A', '70-79%', '#3b82f6'), ('B+', '60-69%', '#3b82f6'), ('B', '50-59%', '#f59e0b'), ('C', '40-49%', '#f59e0b'), ('F', '<40%', '#ef4444')] %}
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid #2a2d3e">
+            <span style="font-weight:800;font-size:13px;color:{{ color }}">{{ grade }}</span>
+            <span style="font-size:12px;color:#64748b">{{ range }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">No Results Published</div>
+        <div class="empty-text">Your exam results will appear here once published by faculty</div>
+        <a href="/student/my-courses" class="btn btn-primary mt-16"><i class="fas fa-book"></i> View My Courses</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

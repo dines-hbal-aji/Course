@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - EduCMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0c14;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #f1f5f9;
+}
+
+.register-box {
+    width: 100%;
+    max-width: 700px;
+    background: #1a1d27;
+    border: 1px solid #2a2d3e;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+}
+
+.register-header {
+    background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+    padding: 36px 40px;
+    text-align: center;
+}
+
+.register-logo {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.register-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.register-sub { color: rgba(255,255,255,0.7); font-size: 15px; }
+
+.register-body { padding: 40px; }
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.alert-warning { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-col-12 { grid-column: 1 / -1; }
+
+.form-group { margin-bottom: 0; }
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.input-wrapper { position: relative; }
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    background: #0f1117;
+    border: 1px solid #2a2d3e;
+    border-radius: 12px;
+    padding: 12px 16px 12px 44px;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.form-input::placeholder { color: #4b5563; }
+
+/* Role selector */
+.role-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.role-option {
+    display: none;
+}
+
+.role-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: #0f1117;
+    border: 2px solid #2a2d3e;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.role-label:hover {
+    border-color: #6366f1;
+    background: rgba(99,102,241,0.05);
+}
+
+.role-option:checked + .role-label {
+    border-color: #6366f1;
+    background: rgba(99,102,241,0.12);
+}
+
+.role-emoji { font-size: 28px; }
+
+.role-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 8px 30px rgba(99,102,241,0.3);
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(99,102,241,0.4);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.auth-footer a {
+    color: #818cf8;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .role-selector { grid-template-columns: repeat(3, 1fr); }
+    .register-body { padding: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="register-box">
+    <div class="register-header">
+        <div class="register-logo">🎓</div>
+        <h2 class="register-title">Create Your Account</h2>
+        <p class="register-sub">Join EduCMS and start your academic journey</p>
+    </div>
+
+    <div class="register-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-info-circle"></i>{{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/register">
+            <!-- Role Selection -->
+            <div class="form-group" style="margin-bottom:28px">
+                <div class="form-label" style="margin-bottom:12px">Select Your Role</div>
+                <div class="role-selector">
+                    <div>
+                        <input type="radio" name="role" id="role_admin" value="admin" class="role-option">
+                        <label for="role_admin" class="role-label">
+                            <span class="role-emoji">👑</span>
+                            <span class="role-name">Admin</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="role" id="role_faculty" value="faculty" class="role-option">
+                        <label for="role_faculty" class="role-label">
+                            <span class="role-emoji">👨‍🏫</span>
+                            <span class="role-name">Faculty</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="role" id="role_student" value="student" class="role-option" checked>
+                        <label for="role_student" class="role-label">
+                            <span class="role-emoji">🎒</span>
+                            <span class="role-name">Student</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" name="name" class="form-input" placeholder="Your full name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password" class="form-input" placeholder="Min. 6 characters" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="text" name="phone" class="form-input" placeholder="10-digit number">
+                    </div>
+                </div>
+                <div class="form-group form-col-12">
+                    <label class="form-label">Department</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-building input-icon"></i>
+                        <input type="text" name="department" class="form-input" placeholder="e.g., Computer Science, Mathematics">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="/login">Sign In here</a>
+        </div>
+        <div class="auth-footer" style="margin-top:10px">
+            <a href="/" style="color:#4b5563">← Back to Home</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+{% endblock %}

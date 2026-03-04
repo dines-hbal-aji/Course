@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCMS - Professional Course Management System</title>
+    <meta name="description" content="Complete academic management solution for colleges and universities">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #6366f1;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0c14;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        /* ANIMATED BACKGROUND */
+        .hero-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb-1 { width: 500px; height: 500px; background: #6366f1; top: -100px; left: -100px; animation-delay: 0s; }
+        .orb-2 { width: 400px; height: 400px; background: #06b6d4; bottom: -100px; right: -100px; animation-delay: 3s; }
+        .orb-3 { width: 300px; height: 300px; background: #f59e0b; top: 50%; left: 50%; animation-delay: 6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10,12,20,0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .brand-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover { color: #f1f5f9; }
+
+        .nav-cta {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-ghost {
+            padding: 9px 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+
+        .btn-hero {
+            padding: 9px 20px;
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+        }
+
+        .btn-hero:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99,102,241,0.5); }
+
+        /* HERO SECTION */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 20px 60px;
+        }
+
+        .hero-content { max-width: 800px; }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #818cf8;
+            margin-bottom: 32px;
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 24px;
+            animation: fadeUp 0.8s ease 0.1s both;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #06b6d4 50%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 20px;
+            color: #94a3b8;
+            line-height: 1.7;
+            margin-bottom: 48px;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease 0.3s both;
+        }
+
+        .btn-cta-primary {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            color: white;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 8px 30px rgba(99,102,241,0.4);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(99,102,241,0.5);
+        }
+
+        .btn-cta-secondary {
+            padding: 16px 36px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #f1f5f9;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-cta-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+
+        /* STATS BAR */
+        .stats-bar {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 40px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-desc {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* FEATURES */
+        .features-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: #64748b;
+            font-size: 18px;
+            margin-bottom: 60px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: rgba(26,29,39,0.6);
+            border: 1px solid rgba(42,45,62,0.8);
+            border-radius: 20px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99,102,241,0.3);
+            box-shadow: 0 20px 60px rgba(99,102,241,0.1);
+        }
+
+        .feature-icon {
+            width: 60px; height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-desc {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* LOGIN CARDS */
+        .login-section {
+            position: relative;
+            z-index: 1;
+            padding: 60px 40px 100px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .login-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .login-card {
+            padding: 40px 32px;
+            border-radius: 24px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .login-card:hover { transform: translateY(-8px); }
+
+        .login-card-admin {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+            border-color: rgba(102,126,234,0.3);
+        }
+
+        .login-card-faculty {
+            background: linear-gradient(135deg, rgba(240,147,251,0.1), rgba(245,87,108,0.1));
+            border-color: rgba(245,87,108,0.3);
+        }
+
+        .login-card-student {
+            background: linear-gradient(135deg, rgba(79,172,254,0.1), rgba(0,242,254,0.1));
+            border-color: rgba(79,172,254,0.3);
+        }
+
+        .login-card-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .login-card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+
+        .login-card-desc {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .login-card-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-admin { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .btn-faculty { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .btn-student { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #0a0c14; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .features-grid, .login-cards { grid-template-columns: 1fr; }
+            .navbar { padding: 16px 20px; }
+            .nav-links { display: none; }
+            .stats-bar { gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <a href="/" class="nav-brand">
+        <div class="brand-logo">🎓</div>
+        <span class="brand-name">EduCMS</span>
+    </a>
+    <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#portals" class="nav-link">Portals</a>
+        <a href="#about" class="nav-link">About</a>
+    </div>
+    <div class="nav-cta">
+        <a href="/login" class="btn-ghost">Sign In</a>
+        <a href="/register" class="btn-hero">Get Started</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            ✨ Professional Academic Management Platform
+        </div>
+        <h1 class="hero-title">
+            Manage Your <br>
+            <span class="gradient-text">Academic World</span><br>
+            Effortlessly
+        </h1>
+        <p class="hero-desc">
+            A complete course management system for modern educational institutions.<br>
+            Empowering admins, faculty, and students with powerful digital tools.
+        </p>
+        <div class="hero-buttons">
+            <a href="/register" class="btn-cta-primary">
+                <i class="fas fa-rocket"></i> Get Started Free
+            </a>
+            <a href="/login" class="btn-cta-secondary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-num">1,200+</div>
+        <div class="stat-desc">Active Students</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">45+</div>
+        <div class="stat-desc">Courses</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">98%</div>
+        <div class="stat-desc">Satisfaction Rate</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">500+</div>
+        <div class="stat-desc">Concurrent Users</div>
+    </div>
+</div>
+
+<!-- Features -->
+<section class="features-section" id="features">
+    <h2 class="section-title">Everything You <span class="gradient-text">Need</span></h2>
+    <p class="section-sub">Powerful features designed for modern educational institutions</p>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon" style="background: rgba(102,126,234,0.15)">🔐</div>
+            <h3 class="feature-title">Role-Based Access</h3>
+            <p class="feature-desc">Secure three-tier authentication for Admins, Faculty, and Students with tailored dashboards.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background: rgba(16,185,129,0.15)">📚</div>
+            <h3 class="feature-title">Course Management</h3>
+            <p class="feature-desc">Full course lifecycle management — create, enroll, deliver, and evaluate with ease.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background: rgba(245,158,11,0.15)">📝</div>
+            <h3 class="feature-title">Assignment System</h3>
+            <p class="feature-desc">Create assignments, students submit files, faculty grades with instant feedback.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background: rgba(239,68,68,0.15)">📊</div>
+            <h3 class="feature-title">Exam & Results</h3>
+            <p class="feature-desc">Schedule exams, publish grades, generate report cards with automatic letter grades.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background: rgba(59,130,246,0.15)">📁</div>
+            <h3 class="feature-title">Study Materials</h3>
+            <p class="feature-desc">Upload and distribute PDFs, videos, presentations securely with download tracking.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background: rgba(168,85,247,0.15)">📈</div>
+            <h3 class="feature-title">Analytics Dashboard</h3>
+            <p class="feature-desc">Real-time charts and insights for enrollment trends, course performance, and more.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Login Portals -->
+<section class="login-section" id="portals">
+    <h2 class="section-title" style="text-align:center">Choose Your <span class="gradient-text">Portal</span></h2>
+    <p class="section-sub">Each role has a dedicated, powerful dashboard</p>
+    
+    <div class="login-cards">
+        <a href="/login" class="login-card login-card-admin">
+            <div class="login-card-icon">👑</div>
+            <h3 class="login-card-title">Administrator</h3>
+            <p class="login-card-desc">Manage courses, users, enrollments, announcements and view system analytics</p>
+            <span class="login-card-btn btn-admin">Admin Login</span>
+        </a>
+        <a href="/login" class="login-card login-card-faculty">
+            <div class="login-card-icon">👨‍🏫</div>
+            <h3 class="login-card-title">Faculty</h3>
+            <p class="login-card-desc">Manage courses, assignments, upload study materials and publish exam results</p>
+            <span class="login-card-btn btn-faculty">Faculty Login</span>
+        </a>
+        <a href="/login" class="login-card login-card-student">
+            <div class="login-card-icon">🎒</div>
+            <h3 class="login-card-title">Student</h3>
+            <p class="login-card-desc">Browse courses, submit assignments, access materials and check results</p>
+            <span class="login-card-btn btn-student">Student Login</span>
+        </a>
+    </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Browse Courses - Student{% endblock %}
+{% block page_title %}Browse Courses{% endblock %}
+{% block page_subtitle %}Explore and enroll in available courses{% endblock %}
+
+{% block content %}
+
+<div class="grid-3">
+    {% for course in all_courses %}
+    <div class="card">
+        <div style="height:6px;background:linear-gradient(135deg,#4facfe,#00f2fe)"></div>
+        <div class="card-body">
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                <span class="badge badge-primary" style="font-family:monospace">{{ course.code }}</span>
+                <span class="badge badge-secondary">Sem {{ course.semester }}</span>
+            </div>
+            <h3 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:8px;line-height:1.3">{{ course.name }}</h3>
+            <p style="font-size:13px;color:#64748b;margin-bottom:14px;line-height:1.5">
+                {{ (course.description or 'No description provided.')[:90] }}{% if course.description and course.description|length > 90 %}…{% endif %}
+            </p>
+            
+            <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#94a3b8;margin-bottom:16px;padding-top:12px;border-top:1px solid #2a2d3e">
+                <span><i class="fas fa-graduation-cap" style="color:#6366f1;margin-right:4px"></i>{{ course.credits }} Credits</span>
+                <span><i class="fas fa-users" style="color:#06b6d4;margin-right:4px"></i>{{ course.max_students }} Seats</span>
+                <span><i class="fas fa-building" style="color:#f59e0b;margin-right:4px"></i>{{ course.department or 'General' }}</span>
+            </div>
+
+            {% if course.faculty %}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px;background:#12141c;border-radius:10px">
+                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">
+                    {{ course.faculty.name[0] }}
+                </div>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#f1f5f9">{{ course.faculty.name }}</div>
+                    <div style="font-size:10px;color:#64748b">Faculty</div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if course.id in enrolled_ids %}
+                {% set enroll = namespace(status='') %}
+                <div style="width:100%;padding:10px;text-align:center;border-radius:10px;font-size:13px;font-weight:600;
+                            background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.3)">
+                    <i class="fas fa-check-circle"></i> Enrolled / Pending
+                </div>
+            {% else %}
+            <form method="POST" action="/student/enroll/{{ course.id }}">
+                <button type="submit" class="btn btn-primary w-full" style="justify-content:center">
+                    <i class="fas fa-plus-circle"></i> Enroll Now
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="grid-column:1/-1">
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <div class="empty-title">No Courses Available</div>
+            <div class="empty-text">Contact the administrator to add courses</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

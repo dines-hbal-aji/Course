@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}My Courses - Student{% endblock %}
+{% block page_title %}My Courses{% endblock %}
+{% block page_subtitle %}Your approved course enrollments{% endblock %}
+
+{% block content %}
+
+{% if enrollments %}
+<div class="grid-3">
+    {% for enroll, course in enrollments %}
+    <a href="/student/courses/{{ course.id }}" style="text-decoration:none">
+        <div class="card" style="cursor:pointer">
+            <div style="height:6px;background:linear-gradient(135deg,#4facfe,#00f2fe)"></div>
+            <div class="card-body">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                    <span class="badge badge-primary" style="font-family:monospace">{{ course.code }}</span>
+                    <span class="badge badge-success">✅ Enrolled</span>
+                </div>
+                <h3 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:8px">{{ course.name }}</h3>
+                <p style="font-size:13px;color:#64748b;margin-bottom:14px">
+                    {{ (course.description or 'No description')[:80] }}{% if course.description and course.description|length > 80 %}…{% endif %}
+                </p>
+                <div style="display:flex;gap:10px;font-size:12px;color:#94a3b8;padding-top:12px;border-top:1px solid #2a2d3e;margin-bottom:16px">
+                    <span>📖 {{ course.credits }} Credits</span>
+                    <span>📅 Sem {{ course.semester }}</span>
+                </div>
+                <div class="btn btn-primary w-full" style="justify-content:center">
+                    <i class="fas fa-arrow-right"></i> View Course
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <div class="empty-title">No Approved Enrollments</div>
+        <div class="empty-text">Browse courses and request enrollment. Admin approval required.</div>
+        <a href="/student/courses" class="btn btn-primary mt-16"><i class="fas fa-compass"></i> Browse Courses</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

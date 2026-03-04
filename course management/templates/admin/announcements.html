@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Announcements - Admin{% endblock %}
+{% block page_title %}Announcements{% endblock %}
+{% block page_subtitle %}Post and manage system-wide announcements{% endblock %}
+
+{% block header_actions %}
+<button onclick="openModal('addAnnModal')" class="btn btn-primary btn-sm">
+    <i class="fas fa-bullhorn"></i> New Announcement
+</button>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid-2 mb-24">
+    <!-- Post Form -->
+    <div class="card" style="grid-column:1/-1">
+        <div class="card-header"><span class="card-title">📢 All Announcements</span></div>
+        {% if announcements %}
+        <div class="card-body">
+            {% for ann in announcements %}
+            <div style="background:#12141c;border-radius:14px;padding:20px;margin-bottom:14px;border-left:4px solid 
+                {% if ann.target_role == 'all' %}#6366f1{% elif ann.target_role == 'student' %}#06b6d4{% else %}#f093fb{% endif %}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                    <h3 style="font-size:16px;font-weight:700;color:#f1f5f9">{{ ann.title }}</h3>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <span class="badge badge-{% if ann.target_role == 'all' %}primary{% elif ann.target_role == 'student' %}info{% else %}warning{% endif %}">
+                            {% if ann.target_role == 'all' %}🌐 Everyone{% elif ann.target_role == 'student' %}🎒 Students{% else %}👨‍🏫 Faculty{% endif %}
+                        </span>
+                        <form method="POST" action="/admin/announcements/{{ ann.id }}/delete" onsubmit="return confirm('Delete?')">
+                            <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <p style="color:#94a3b8;font-size:14px;line-height:1.7">{{ ann.content }}</p>
+                <div style="margin-top:12px;font-size:12px;color:#4b5563">
+                    <i class="fas fa-user" style="margin-right:6px"></i>{{ ann.author.name }} &nbsp;·&nbsp;
+                    <i class="fas fa-calendar" style="margin-right:6px"></i>{{ ann.created_at.strftime('%d %b %Y, %H:%M') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📢</div>
+            <div class="empty-title">No Announcements Yet</div>
+            <div class="empty-text">Click "New Announcement" to post your first message</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addAnnModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">📢 New Announcement</span>
+            <button class="modal-close" onclick="closeModal('addAnnModal')">✕</button>
+        </div>
+        <form method="POST" action="/admin/announcements">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Title *</label>
+                    <input type="text" name="title" class="form-control" placeholder="Announcement title" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Target Audience</label>
+                    <select name="target_role" class="form-control">
+                        <option value="all">🌐 Everyone</option>
+                        <option value="student">🎒 Students Only</option>
+                        <option value="faculty">👨‍🏫 Faculty Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message *</label>
+                    <textarea name="content" class="form-control" rows="5" placeholder="Write your announcement..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('addAnnModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
